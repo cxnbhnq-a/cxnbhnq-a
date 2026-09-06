@@ -1,67 +1,74 @@
 {
   "$schema": "./profile.schema.json",
   "profile": {
-    "name": "Your Name",
-    "username": "yourusername",
-    "headline": "AI Engineer & Product Builder",
-    "affiliation": "Your University or Company",
-    "location": "City, Country",
-    "status": "Learning / Building / Shipping",
+    "name": "Nabhan Qori Albana",
+    "username": "cxnbhnq-a",
+    "headline": "Cyber Security | IT Enthusiast",
+    "affiliation": "Politeknik Negeri Cilacap",
+    "location": "Cilacap, Indonesia",
+    "status": "Building",
     "about": [
-      "I build practical systems at the intersection of artificial intelligence, software engineering, and products people can trust.",
-      "My work combines technical exploration with a builder mindset: understand the problem, test the system, and share what actually works."
+      "I build practical systems at the intersection of software engineering, artificial intelligence, and cybersecurity, turning complex problems into reliable solutions.",
+      "I approach technology with a builder\u2019s mindset: understand how things work, test them in practice, break what doesn\u2019t hold up, and share what I learn."
     ]
   },
   "research": {
-    "primary": "AI Agents",
-    "direction": "Reliable autonomous systems",
-    "themes": "Tool use / evaluation / human control",
-    "narrative": "I am interested in systems that can observe state, use tools, evaluate outcomes, and take bounded actions with clear evidence and human oversight."
+    "primary": "Cybersecurity & Software",
+    "direction": "Resilient systems & security research",
+    "themes": "Security / Engineering / Research / Learn",
+    "narrative": "I am interested in understanding how intelligent systems interact with real-world environments: how they observe state, use tools, evaluate outcomes, and take bounded actions while maintaining clear evidence, security, and meaningful human oversight."
   },
   "focus": [
     {
-      "name": "AI Agents",
-      "description": "Autonomous workflows, tool use, evaluation, and reliable agent behavior."
+      "name": "Cybersecurity",
+      "description": "Offensive security, vulnerability research, system analysis, and practical security testing."
     },
     {
-      "name": "Applied AI",
-      "description": "Turning model capabilities into useful and testable software systems."
+      "name": "Software Engineering",
+      "description": "Building reliable, maintainable software that turns complex ideas into practical and testable systems."
     },
     {
-      "name": "Developer Tools",
-      "description": "Better workflows for building, testing, and operating modern software."
+      "name": "Artificial Intelligence",
+      "description": "Building and evaluating intelligent systems that can reason, use tools, adapt to context, and operate reliably in real-world environments."
+    },
+    {
+      "name": "Security Research",
+      "description": "Exploring how systems break, identifying vulnerabilities, and developing practical techniques to understand, test, and improve their security."
     }
   ],
   "projects": [
     {
-      "name": "Project One",
-      "url": "https://github.com/yourusername/project-one",
+      "name": "Web Security",
+      "url": "https://github.com/cxnbhnq-a",
       "homepage": "",
-      "focus": "Primary project focus",
-      "summary": "A concise explanation of what the project does and why it matters.",
-      "heroLabel": "Primary build"
+      "focus": "Web App Security & Offensive Security",
+      "summary": "Research into web security, covering vulnerability discovery, auth & access control testing, API security, WordPress exploitation, and practical exploit validation in authorized environments.",
+      "heroLabel": "Web Security Research"
     },
     {
-      "name": "Project Two",
-      "url": "https://github.com/yourusername/project-two",
+      "name": "Web App Dev",
+      "url": "https://github.com/cxnbhnq-a",
       "homepage": "",
-      "focus": "Secondary project focus",
-      "summary": "A second project that supports the professional direction of this profile.",
-      "heroLabel": "Active system"
+      "focus": "Full-Stack Web Development",
+      "summary": "Building practical web applications with modern technologies, focusing on clean implementation, useful functionality, responsive interfaces, and reliable user experiences.",
+      "heroLabel": "Web Development"
     }
   ],
   "techStack": [
-    "TypeScript",
-    "Next.js",
     "Python",
-    "PostgreSQL",
-    "Playwright"
+    "JavaScript",
+    "TypeScript",
+    "React",
+    "Next.js",
+    "Node.js",
+    "Linux",
+    "Burp Suite"
   ],
   "links": [
     {
       "label": "GitHub",
-      "value": "yourusername",
-      "url": "https://github.com/yourusername",
+      "value": "cxnbhnq-a",
+      "url": "https://github.com/cxnbhnq-a",
       "logo": "github",
       "color": "0B1220"
     }
@@ -73,5 +80,5 @@
   "appearance": {
     "palette": "signal"
   },
-  "footer": "Building thoughtful systems and sharing what works."
+  "footer": "Building, breaking, and understanding systems that matter."
 }
