@@ -98,7 +98,7 @@ Cyber Security | Full-Stack Developer | Software Engineer
 
 
 <!-- AUTO:ACTIVITY:START -->
-_Recent public activity will appear here after the workflow runs._
+
 <!-- AUTO:ACTIVITY:END -->
 
 ---
