@@ -13,37 +13,86 @@
   <a href="https://github.com/cxnbhnq-a"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-cxnbhnq--a-0B1220?style=for-the-badge&logo=github&logoColor=white"></a>
 </p>
 
-## About Me
+<h1 align="center">Nabhan Qori Albana</h1>
 
-I build practical systems at the intersection of software engineering, artificial intelligence, and cybersecurity, turning complex problems into reliable solutions.
+<p align="center">
+<img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=25&pause=1000&center=true&vCenter=true&width=700&lines=IT+Enthusiast;System+Administrator;Front-End+Developer;Traveler+Enthusiast;Cyber+Security+Learner" />
+</p>
 
-I approach technology with a builder’s mindset: understand how things work, test them in practice, break what doesn’t hold up, and share what I learn.
+<h3 align="center">
+Cyber Security | Full-Stack Developer | Security Researcher
+</h3>
 
-## Current Focus
+---
 
-| Area | What I am exploring |
-| --- | --- |
-| **Cybersecurity** | Offensive security, vulnerability research, system analysis, and practical security testing. |
-| **Software Engineering** | Building reliable, maintainable software that turns complex ideas into practical and testable systems. |
-| **Artificial Intelligence** | Building and evaluating intelligent systems that can reason, use tools, adapt to context, and operate reliably in real-world environments. |
-| **Security Research** | Exploring how systems break, identifying vulnerabilities, and developing practical techniques to understand, test, and improve their security. |
+# 🧑‍💻 About Me
 
-## Featured Work
+* 🔐 Cyber Security Enthusiast
+* 💻 Front-End Developer
+* 🖥  System Administrator
+* 🎨 UI/UX Designer
+* 🌍 Traveler Enthusiast
+* 📍 Tegal, Jawa Tengah, Indonesia
 
-| Project | Focus | Why it matters |
-| --- | --- | --- |
-| [**Web Security**](https://github.com/cxnbhnq-a) | Web App Security & Offensive Security | Research into web security, covering vulnerability discovery, auth & access control testing, API security, WordPress exploitation, and practical exploit validation in authorized environments. |
-| [**Web App Dev**](https://github.com/cxnbhnq-a) | Full-Stack Web Development | Building practical web applications with modern technologies, focusing on clean implementation, useful functionality, responsive interfaces, and reliable user experiences. |
+---
 
-## Research Direction
+# 🧠 Skills
 
-I am interested in understanding how intelligent systems interact with real-world environments: how they observe state, use tools, evaluate outcomes, and take bounded actions while maintaining clear evidence, security, and meaningful human oversight.
+<p align="center">
 
-## Tech Stack
+<img src="https://skillicons.dev/icons?i=html,css,js,nodejs,bootstrap,python,mysql,github,linux,ubuntu,kali,arch&perline=6"/>
 
-`Python` · `JavaScript` · `TypeScript` · `React` · `Next.js` · `Node.js` · `Linux` · `Burp Suite`
+</p>
 
-## Recent Activity
+### Additional Tools
+
+* Microsoft Word
+* Microsoft Excel
+* Canva
+* Corel Draw
+
+---
+
+# 👾 GitHub Contribution Game
+
+<p align="center">
+
+<img src="https://raw.githubusercontent.com/cxnbhnq-a/cxnbhnq-a/output/pacman-contribution-graph.svg">
+
+</p>
+
+---
+
+# ⚡ GitHub Stats
+
+<p align="center">
+
+<img src="https://github-readme-stats.vercel.app/api?username=cxnbhnq-a&show_icons=true&theme=tokyonight"/>
+
+<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=cxnbhnq-a&layout=compact&theme=tokyonight"/>
+
+</p>
+
+---
+
+# 🔗 Connect With Me
+
+<p align="center">
+
+<a href="mailto:nabhanqr07@gmail.com">
+<img src="https://img.shields.io/badge/Gmail-red?style=for-the-badge&logo=gmail">
+</a>
+
+<a href="https://github.com/cxnbhnq-a">
+<img src="https://img.shields.io/badge/Github-black?style=for-the-badge&logo=github">
+</a>
+
+<a href="https://www.linkedin.com/in/nabhan-qori-albana">
+<img src="https://img.shields.io/badge/LinkedIn-blue?style=for-the-badge&logo=linkedin">
+</a>
+
+</p>
+
 
 <!-- AUTO:ACTIVITY:START -->
 _Recent public activity will appear here after the workflow runs._
@@ -52,5 +101,5 @@ _Recent public activity will appear here after the workflow runs._
 ---
 
 <p align="center">
-  Building, breaking, and understanding systems that matter.
+   "Exploring Security, Building Technology, and Creating Solutions"
 </p>
