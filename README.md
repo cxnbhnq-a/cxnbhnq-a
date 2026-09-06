@@ -71,9 +71,6 @@ Cyber Security | Full-Stack Developer | Software Engineer
 
 # ⚡ GitHub Stats
 
-<p align="center">
-  <img src="https://github-profile-trophy.vercel.app/?username=cxnbhnq-a&theme=onedark&column=4" alt="GitHub Trophies" />
-</p>
 
 <p align="center">
   <img src="https://github-readme-streak-stats.herokuapp.com/?user=cxnbhnq-a&theme=tokyonight&hide_border=true" alt="GitHub Streak" />
