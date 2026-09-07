@@ -152,6 +152,9 @@ Cyber Security | Full-Stack Developer | Software Engineer
 <img src="https://img.shields.io/badge/LinkedIn-blue?style=for-the-badge&logo=linkedin">
 </a>
 
+<!-- AUTO:ACTIVITY:START -->
+<!-- AUTO:ACTIVITY:END -->
+
 </p>
 
 
