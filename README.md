@@ -78,21 +78,21 @@ Cyber Security | Full-Stack Developer | Software Engineer
         <br>Laravel
       </td>
       <td align="center" width="96" style="padding: 10px;">
-        <img src="https://skillicons.dev/icons?i=nodejs" width="48" height="48" alt="Node.js" />
-        <br>Node.js
+        <img src="https://iconic-api.onrender.com/dark/docker" width="48" height="48" alt="Docker" />
+        <br>Docker
       </td>
       <td align="center" width="96" style="padding: 10px;">
-        <img src="https://skillicons.dev/icons?i=express" width="48" height="48" alt="Express.js" />
-        <br>Express.js
+        <img src="https://iconic-api.onrender.com/dark/arch" width="48" height="48" alt="Arch" />
+        <br>Arch
       </td>
       <td align="center" width="96" style="padding: 10px;">
-        <img src="https://skillicons.dev/icons?i=py" width="48" height="48" alt="Python" />
+        <img src="https://techstack-generator.vercel.app/python-icon.svg" width="48" height="48" alt="Python" />
         <br>Python
       </td>
     </tr>
     <tr>
       <td align="center" width="96" style="padding: 10px;">
-        <img src="https://skillicons.dev/icons?i=mysql" width="48" height="48" alt="MySQL" />
+        <img src="https://techstack-generator.vercel.app/mysql-icon.svg" width="48" height="48" alt="MySQL" />
         <br>MySQL
       </td>
       <td align="center" width="96" style="padding: 10px;">
