@@ -67,12 +67,12 @@ Cyber Security | Full-Stack Developer | Software Engineer
         <img src="https://skillicons.dev/icons?i=bootstrap" width="48" height="48" alt="Bootstrap" />
         <br>Bootstrap
       </td>
+    </tr>
+    <tr>
       <td align="center" width="96" style="padding: 10px;">
         <img src="https://skillicons.dev/icons?i=figma" width="48" height="48" alt="Figma" />
         <br>Figma
       </td>
-    </tr>
-    <tr>
       <td align="center" width="96" style="padding: 10px;">
         <img src="https://skillicons.dev/icons?i=laravel" width="48" height="48" alt="Laravel" />
         <br>Laravel
