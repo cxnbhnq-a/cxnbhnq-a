@@ -44,18 +44,76 @@ Cyber Security | Full-Stack Developer | Software Engineer
 
 # 🧠 Skills
 
-<p align="center">
-
-<img src="https://skillicons.dev/icons?i=html,css,js,nodejs,bootstrap,python,mysql,github,linux,ubuntu,kali,arch&perline=6"/>
-
-</p>
-
-### Additional Tools
-
-* Microsoft Word
-* Microsoft Excel
-* Canva
-* Corel Draw
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="96" style="padding: 10px;">
+        <img src="https://skillicons.dev/icons?i=vscode" width="48" height="48" alt="Vscode" />
+        <br>Vscode
+      </td>
+      <td align="center" width="96" style="padding: 10px;">
+        <img src="https://github.com/user-attachments/assets/7eb30513-f818-4425-a384-599c7a28d678" width="48" height="48" alt="HTML" />
+        <br>HTML
+      </td>
+      <td align="center" width="96" style="padding: 10px;">
+        <img src="https://skillicons.dev/icons?i=css" width="48" height="48" alt="CSS" />
+        <br>CSS
+      </td>
+      <td align="center" width="96" style="padding: 10px;">
+        <img src="https://techstack-generator.vercel.app/js-icon.svg" width="48" height="48" alt="JavaScript" />
+        <br>JavaScript
+      </td>
+      <td align="center" width="96" style="padding: 10px;">
+        <img src="https://skillicons.dev/icons?i=bootstrap" width="48" height="48" alt="Bootstrap" />
+        <br>Bootstrap
+      </td>
+      <td align="center" width="96" style="padding: 10px;">
+        <img src="https://skillicons.dev/icons?i=figma" width="48" height="48" alt="Figma" />
+        <br>Figma
+      </td>
+    </tr>
+    <tr>
+      <td align="center" width="96" style="padding: 10px;">
+        <img src="https://skillicons.dev/icons?i=laravel" width="48" height="48" alt="Laravel" />
+        <br>Laravel
+      </td>
+      <td align="center" width="96" style="padding: 10px;">
+        <img src="https://skillicons.dev/icons?i=nodejs" width="48" height="48" alt="Node.js" />
+        <br>Node.js
+      </td>
+      <td align="center" width="96" style="padding: 10px;">
+        <img src="https://skillicons.dev/icons?i=express" width="48" height="48" alt="Express.js" />
+        <br>Express.js
+      </td>
+      <td align="center" width="96" style="padding: 10px;">
+        <img src="https://skillicons.dev/icons?i=py" width="48" height="48" alt="Python" />
+        <br>Python
+      </td>
+    </tr>
+    <tr>
+      <td align="center" width="96" style="padding: 10px;">
+        <img src="https://skillicons.dev/icons?i=mysql" width="48" height="48" alt="MySQL" />
+        <br>MySQL
+      </td>
+      <td align="center" width="96" style="padding: 10px;">
+        <img src="https://skillicons.dev/icons?i=postman" width="48" height="48" alt="Postman" />
+        <br>Postman
+      </td>
+      <td align="center" width="96" style="padding: 10px;">
+        <img src="https://raw.githubusercontent.com/flaviofilipe/flaviofilipe/main/assets/github.gif" width="48" height="48" alt="GitHub" />
+        <br>GitHub
+      </td>
+      <td align="center" width="96" style="padding: 10px;">
+        <img src="https://skillicons.dev/icons?i=kotlin" width="48" height="48" alt="Kotlin" />
+        <br>Kotlin
+      </td>
+      <td align="center" width="96" style="padding: 10px;">
+        <img src="https://skillicons.dev/icons?i=kali" width="48" height="48" alt="Kali Linux" />
+        <br>Kali Linux
+      </td>
+    </tr>
+  </table>
+</div>
 
 ---
 
