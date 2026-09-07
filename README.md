@@ -100,7 +100,7 @@ Cyber Security | Full-Stack Developer | Software Engineer
         <br>Postman
       </td>
       <td align="center" width="96" style="padding: 10px;">
-        <img src="https://raw.githubusercontent.com/flaviofilipe/flaviofilipe/main/assets/github.gif" width="48" height="48" alt="GitHub" />
+        <img src="https://techstack-generator.vercel.app/github-icon.svg" width="48" height="48" alt="GitHub" />
         <br>GitHub
       </td>
       <td align="center" width="96" style="padding: 10px;">
