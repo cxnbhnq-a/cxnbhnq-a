@@ -1,11 +1,11 @@
 <!-- Generated from profile.config.json with Nabhan's profile builder. -->
 <p align="center">
   <picture>
-    <source media="(max-width: 760px) and (prefers-color-scheme: dark)" srcset="./assets/hero/terminal-profile-819b67af-mobile-dark.svg">
-    <source media="(max-width: 760px)" srcset="./assets/hero/terminal-profile-819b67af-mobile-light.svg">
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/hero/terminal-profile-819b67af-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="./assets/hero/terminal-profile-819b67af-light.svg">
-    <img src="./assets/hero/terminal-profile-819b67af-dark.svg" alt="Nabhan Qori Albana — Cyber Security | IT Enthusiast" width="100%">
+    <source media="(max-width: 760px) and (prefers-color-scheme: dark)" srcset="./assets/hero/terminal-profile-56c603ea-mobile-dark.svg">
+    <source media="(max-width: 760px)" srcset="./assets/hero/terminal-profile-56c603ea-mobile-light.svg">
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/hero/terminal-profile-56c603ea-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./assets/hero/terminal-profile-56c603ea-light.svg">
+    <img src="./assets/hero/terminal-profile-56c603ea-dark.svg" alt="Nabhan Qori Albana — Cyber Security | IT Enthusiast" width="100%">
   </picture>
 </p>
 

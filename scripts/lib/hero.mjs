@@ -3,7 +3,10 @@ import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { bounded, xmlText } from "./xml.mjs";
 
-const rendererRevision = "nabhan-terminal-art-2026-09-26-r2";
+const rendererRevision = "nabhan-terminal-art-2026-09-26-r4";
+const portraitRows = 80;
+const portraitFont = 4.8;
+const portraitStep = 4.5;
 
 const colorSets = {
   signal: { dark: ["#111214", "#15191A", "#DCE8E4", "#788781", "#00D6AA", "#2864F0", "#00B879"], light: ["#F1F3F5", "#FFFFFF", "#17221F", "#66736E", "#008F75", "#2858D8", "#087C57"] },
@@ -17,13 +20,24 @@ async function portraitFromImage(path) {
   const meta = await sharp(image).metadata();
   if (!meta.hasAlpha) throw new Error("Portrait PNG must have a transparent background.");
   const bounds = { background: { r: 0, g: 0, b: 0, alpha: 0 }, threshold: 8 };
-  const gray = await sharp(image).ensureAlpha().trim(bounds).flatten({ background: "white" }).greyscale().normalise().resize(96, 64, { fit: "fill" }).raw().toBuffer();
-  const alpha = await sharp(image).ensureAlpha().trim(bounds).extractChannel("alpha").resize(96, 64, { fit: "fill" }).raw().toBuffer();
+  const cropped = sharp(image).ensureAlpha().trim(bounds);
+  const dimensions = await cropped.metadata();
+  const displayCellRatio = (portraitFont * 0.6 - 0.12) / portraitStep;
+  const contentWidth = Math.max(1, Math.min(96, Math.round(portraitRows * (dimensions.width / dimensions.height) / displayCellRatio)));
+  const [gray, alpha] = await Promise.all([
+    cropped.clone().flatten({ background: "white" }).greyscale().normalise().sharpen().resize(contentWidth, portraitRows, { fit: "fill" }).raw().toBuffer(),
+    cropped.clone().extractChannel("alpha").resize(contentWidth, portraitRows, { fit: "fill" }).raw().toBuffer()
+  ]);
   const glyphs = " .:-=+*#%@";
-  return Array.from({ length: 64 }, (_, y) => Array.from({ length: 96 }, (_, x) => {
-    const i = y * 96 + x;
-    const light = gray[i] * (alpha[i] / 255);
-    return glyphs[bounded(Math.round((255 - light) / 255 * (glyphs.length - 1)), 0, glyphs.length - 1)];
+  return Array.from({ length: portraitRows }, (_, y) => Array.from({ length: 96 }, (_, x) => {
+    const sourceX = x - Math.floor((96 - contentWidth) / 2);
+    if (sourceX < 0 || sourceX >= contentWidth) return " ";
+    const i = y * contentWidth + sourceX;
+    const opacity = alpha[i] / 255;
+    if (opacity < 0.08) return " ";
+    const light = gray[i] * opacity + 255 * (1 - opacity);
+    const tone = bounded(Math.round((255 - light) / 255 * (glyphs.length - 2)), 0, glyphs.length - 2) + 1;
+    return glyphs[tone];
   }).join(""));
 }
 
@@ -55,9 +69,8 @@ function makeSvg(config, portrait, variant) {
   const height = mobile ? 1230 : 650;
   const frame = mobile ? { x: 34, y: 84, w: 652, h: 426 } : { x: 36, y: 94, w: 458, h: 466 };
   const info = mobile ? { x: 34, y: 532, w: 652, h: 570, left: 56, top: 608, step: 19, font: 13 } : { x: 514, y: 94, w: 630, h: 466, left: 536, top: 132, step: 18, font: 11.5 };
-  const portraitStep = 6;
-  const portraitY = frame.y + 38 + (frame.h - 50 - 63 * portraitStep) / 2;
-  const picture = portrait.slice(0, 64).map((row, i) => `<tspan x="${frame.x + frame.w / 2}" y="${(portraitY + i * portraitStep).toFixed(1)}">${xmlText(row)}</tspan>`).join("");
+  const portraitY = frame.y + 38 + (frame.h - 50 - (portraitRows - 1) * portraitStep) / 2;
+  const picture = portrait.slice(0, portraitRows).map((row, i) => `<tspan x="${frame.x + frame.w / 2}" y="${(portraitY + i * portraitStep).toFixed(1)}">${xmlText(row)}</tspan>`).join("");
   const details = profileRows(config).map(([key, value], i) => {
     const y = info.top + i * info.step;
     if (key === "prompt") return `<text x="${info.left}" y="${y}" fill="${blue}" font-size="${info.font + 1}" font-weight="bold">${xmlText(value)}</text>`;
@@ -83,8 +96,8 @@ function makeSvg(config, portrait, variant) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${xmlText(config.profile.name)} terminal profile">
 <title>${xmlText(config.profile.name)} — ${xmlText(config.profile.headline)}</title>
 <defs><clipPath id="portrait-window"><rect x="${frame.x}" y="${frame.y}" width="${frame.w}" height="${frame.h}" rx="12"/></clipPath><linearGradient id="edge"><stop stop-color="${blue}"/><stop offset="1" stop-color="${green}"/></linearGradient><linearGradient id="beam"><stop stop-color="${cyan}" stop-opacity="0"/><stop offset=".5" stop-color="${cyan}" stop-opacity=".35"/><stop offset="1" stop-color="${cyan}" stop-opacity="0"/></linearGradient></defs>
-<style>text{font-family:'Courier New',monospace}.portrait{font-size:6.3px;letter-spacing:-.12px}@media(prefers-reduced-motion:reduce){animate,animateTransform{display:none}}</style>
-<rect width="100%" height="100%" fill="${bg}"/><g fill="${green}" opacity=".16">${rain}<animateTransform attributeName="transform" type="translate" values="0 90;90 -80;180 -250" dur="22s" repeatCount="indefinite"/></g><g fill="${green}" opacity=".08">${secondRain}<animateTransform attributeName="transform" type="translate" values="0 0;80 -145;160 -290" dur="31s" repeatCount="indefinite"/></g>
+<style>text{font-family:'Courier New',monospace}.portrait{font-size:${portraitFont}px;letter-spacing:-.12px}@media(prefers-reduced-motion:reduce){animate,animateTransform{display:none}}</style>
+<rect width="100%" height="100%" fill="${bg}"/><g fill="${green}" opacity=".21">${rain}<animateTransform attributeName="transform" type="translate" values="0 90;90 -80;180 -250" dur="22s" repeatCount="indefinite"/></g><g fill="${green}" opacity=".12">${secondRain}<animateTransform attributeName="transform" type="translate" values="0 0;80 -145;160 -290" dur="31s" repeatCount="indefinite"/></g>
 <rect x="24" y="28" width="${width - 48}" height="${height - 56}" fill="none" stroke="url(#edge)" stroke-width="1.5"/>
 <circle cx="54" cy="54" r="6" fill="#ff3334"/><circle cx="72" cy="54" r="6" fill="#ffb01f"/><circle cx="90" cy="54" r="6" fill="#00c853"/>
 <text x="142" y="58" fill="${muted}" font-size="12">${xmlText(config.profile.username)}@profile ~ % ./profile-live</text><text x="${width - 48}" y="58" fill="${cyan}" font-size="9" text-anchor="end">● SCANNING</text>
@@ -97,7 +110,7 @@ function makeSvg(config, portrait, variant) {
 <rect x="24" y="28" width="${width - 48}" height="12" fill="url(#beam)" opacity=".8"><animate attributeName="y" values="28;${height - 42};28" dur="14s" repeatCount="indefinite"/></rect>
 ${bars}<text x="220" y="${height - 38}" fill="${cyan}" font-size="9">AUDIO SIGNAL</text>
 <text x="${width - 48}" y="${height - 38}" text-anchor="end" fill="${muted}" font-size="9">${xmlText(config.profile.location.toUpperCase())} · ${xmlText(config.profile.status.toUpperCase())}</text>
-<text class="portrait-source" display="none">${portrait.slice(0, 64).map((row) => `<tspan>${xmlText(row)}</tspan>`).join("")}</text></svg>`;
+<text class="portrait-source" display="none">${portrait.slice(0, portraitRows).map((row) => `<tspan>${xmlText(row)}</tspan>`).join("")}</text></svg>`;
 }
 
 export async function createHeroAssets(config, sourcePath, directory) {
