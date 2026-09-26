@@ -1,0 +1,104 @@
+import { createHash } from "node:crypto";
+import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { bounded, xmlText } from "./xml.mjs";
+
+const colorSets = {
+  signal: { dark: ["#111214", "#15191A", "#DCE8E4", "#788781", "#00D6AA", "#2864F0", "#00B879"], light: ["#F1F3F5", "#FFFFFF", "#17221F", "#66736E", "#008F75", "#2858D8", "#087C57"] },
+  ocean: { dark: ["#0C1418", "#111D21", "#DCEBED", "#73888D", "#40D7C0", "#4B9BFF", "#38BC87"], light: ["#F0F8F8", "#FFFFFF", "#17333A", "#657D81", "#087D73", "#2778C6", "#087C57"] },
+  solar: { dark: ["#151310", "#1D1A16", "#F0E9DB", "#948A78", "#48D2AE", "#75A5FF", "#C2D65C"], light: ["#FBF8F0", "#FFFFFF", "#30291F", "#817663", "#087D67", "#365FBE", "#617C20"] }
+};
+
+async function portraitFromImage(path) {
+  const { default: sharp } = await import("sharp");
+  const image = await readFile(path);
+  const meta = await sharp(image).metadata();
+  if (!meta.hasAlpha) throw new Error("Portrait PNG must have a transparent background.");
+  const bounds = { background: { r: 0, g: 0, b: 0, alpha: 0 }, threshold: 8 };
+  const gray = await sharp(image).ensureAlpha().trim(bounds).flatten({ background: "white" }).greyscale().normalise().resize(96, 64, { fit: "fill" }).raw().toBuffer();
+  const alpha = await sharp(image).ensureAlpha().trim(bounds).extractChannel("alpha").resize(96, 64, { fit: "fill" }).raw().toBuffer();
+  const glyphs = " .:-=+*#%@";
+  return Array.from({ length: 64 }, (_, y) => Array.from({ length: 96 }, (_, x) => {
+    const i = y * 96 + x;
+    const light = gray[i] * (alpha[i] / 255);
+    return glyphs[bounded(Math.round((255 - light) / 255 * (glyphs.length - 1)), 0, glyphs.length - 1)];
+  }).join(""));
+}
+
+async function portraitFromAssets(directory) {
+  const manifest = JSON.parse(await readFile(resolve(directory, "manifest.json"), "utf8"));
+  const svg = await readFile(resolve(directory, manifest.assets.desktopDark), "utf8");
+  const encoded = svg.match(/<text class="(?:portrait-source|ascii-source)"[^>]*>([\s\S]*?)<\/text>/)?.[1];
+  if (!encoded) throw new Error("Portrait source is unavailable. Pass --source with a transparent PNG.");
+  return [...encoded.matchAll(/<tspan>([\s\S]*?)<\/tspan>/g)].map((match) => match[1]);
+}
+
+function profileRows(config) {
+  return [
+    ["SYSTEM.INFO /", ""], ["Name", config.profile.name], ["Role", config.profile.headline],
+    ["Study", config.profile.affiliation], ["Base", config.profile.location], ["Status", config.profile.status],
+    ["ABOUT.ME /", ""], ...config.profile.quickFacts.slice(0, 4).map((v, i) => [`Note ${i + 1}`, v]),
+    ["RESEARCH.NODE /", ""], ["Primary", config.research.primary], ["Direction", config.research.direction], ["Themes", config.research.themes],
+    ["BUILD.LOG /", ""], ...config.projects.slice(0, 2).map((item) => [item.name, item.focus]),
+    ["GRID.LINKS /", ""], ...config.links.slice(0, 3).map((item) => [item.label, item.value])
+  ];
+}
+
+function makeSvg(config, portrait, variant) {
+  const mobile = variant.includes("mobile");
+  const light = variant.includes("light");
+  const [bg, panel, ink, muted, cyan, blue, green] = colorSets[config.appearance.palette][light ? "light" : "dark"];
+  const width = mobile ? 720 : 1180;
+  const height = mobile ? 1230 : 650;
+  const frame = mobile ? { x: 34, y: 84, w: 652, h: 426 } : { x: 36, y: 94, w: 458, h: 466 };
+  const info = mobile ? { x: 34, y: 532, w: 652, h: 570, left: 56, top: 608, step: 19, font: 13 } : { x: 514, y: 94, w: 630, h: 466, left: 536, top: 132, step: 18, font: 11.5 };
+  const portraitStep = 6;
+  const portraitY = frame.y + 38 + (frame.h - 50 - 63 * portraitStep) / 2;
+  const picture = portrait.slice(0, 64).map((row, i) => `<tspan x="${frame.x + frame.w / 2}" y="${(portraitY + i * portraitStep).toFixed(1)}">${xmlText(row)}</tspan>`).join("");
+  const details = profileRows(config).map(([key, value], i) => {
+    const y = info.top + i * info.step;
+    if (!value) return `<text x="${info.left}" y="${y}" fill="${cyan}" font-weight="bold">${xmlText(key)} <tspan fill="${muted}">${"─".repeat(mobile ? 24 : 32)}</tspan></text>`;
+    return `<text x="${info.left}" y="${y}" fill="${muted}"><tspan fill="${cyan}">${xmlText(key)}</tspan><tspan fill="${muted}">${"·".repeat(Math.max(2, 14 - key.length))}</tspan><tspan x="${info.left + (mobile ? 120 : 126)}" fill="${ink}">${xmlText(value)}</tspan></text>`;
+  }).join("\n");
+  const rain = Array.from({ length: mobile ? 24 : 38 }, (_, i) => {
+    const x = (i * (mobile ? 86 : 112) - 70) % width;
+    const y = (i % 8) * 90 - 30;
+    const stream = Array.from({ length: 5 }, (_, row) => `<tspan x="${x}" dy="${row ? 18 : 0}">01  11  001  0</tspan>`).join("");
+    return `<text x="${x}" y="${y}" transform="rotate(18 ${x} ${y})">${stream}</text>`;
+  }).join("");
+  const bars = Array.from({ length: 31 }, (_, i) => {
+    const value = [3, 5, 8, 14, 8, 4, 11, 18, 9, 5, 14, 22, 11, 6, 16, 25, 10, 5, 12, 19, 9, 4, 14, 20, 8, 4, 11, 17, 7, 4, 9][i];
+    return `<rect x="${52 + i * 5}" y="${height - 43 - value / 2}" width="2.4" height="${value}" rx="1.2" fill="${cyan}"/>`;
+  }).join("");
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${xmlText(config.profile.name)} terminal profile">
+<title>${xmlText(config.profile.name)} — ${xmlText(config.profile.headline)}</title>
+<defs><clipPath id="portrait-window"><rect x="${frame.x}" y="${frame.y}" width="${frame.w}" height="${frame.h}" rx="12"/></clipPath><linearGradient id="edge"><stop stop-color="${blue}"/><stop offset="1" stop-color="${green}"/></linearGradient><linearGradient id="beam"><stop stop-color="${cyan}" stop-opacity="0"/><stop offset=".5" stop-color="${cyan}" stop-opacity=".35"/><stop offset="1" stop-color="${cyan}" stop-opacity="0"/></linearGradient></defs>
+<style>text{font-family:'Courier New',monospace;font-size:${mobile ? 12 : 10}px}.portrait{font-size:6.3px;letter-spacing:-.12px}@media(prefers-reduced-motion:reduce){animate,animateTransform{display:none}}</style>
+<rect width="100%" height="100%" fill="${bg}"/><g fill="${green}" opacity=".1" font-size="15">${rain}<animateTransform attributeName="transform" type="translate" values="0 120;100 -40;190 -230" dur="24s" repeatCount="indefinite"/></g>
+<rect x="24" y="28" width="${width - 48}" height="${height - 56}" fill="none" stroke="url(#edge)" stroke-width="1.5"/>
+<circle cx="54" cy="54" r="6" fill="#ff3334"/><circle cx="72" cy="54" r="6" fill="#ffb01f"/><circle cx="90" cy="54" r="6" fill="#00c853"/>
+<text x="142" y="58" fill="${muted}">${xmlText(config.profile.username)}@profile ~ % ./profile-live</text><text x="${width - 48}" y="58" fill="${cyan}" text-anchor="end">● SCANNING</text>
+<rect x="${frame.x}" y="${frame.y}" width="${frame.w}" height="${frame.h}" rx="12" fill="${panel}" fill-opacity=".45" stroke="${blue}"/>
+<rect x="${info.x}" y="${info.y}" width="${info.w}" height="${info.h}" rx="12" fill="${panel}" fill-opacity=".55" stroke="${green}" stroke-opacity=".7"/>
+<text x="${frame.x + 20}" y="${frame.y + 28}" fill="${muted}" letter-spacing="1.2">VISUAL.ID / PORTRAIT.SIGNAL</text>
+<g clip-path="url(#portrait-window)"><text class="portrait" text-anchor="middle" fill="${cyan}" opacity=".95">${picture}</text></g>
+<text x="${info.x + 22}" y="${info.y + 28}" fill="${muted}" letter-spacing="1.2">SYSTEM.INFO / RESEARCH.BUILDS</text>
+<g font-size="${info.font}">${details}</g>
+<rect x="24" y="28" width="${width - 48}" height="12" fill="url(#beam)" opacity=".8"><animate attributeName="y" values="28;${height - 42};28" dur="14s" repeatCount="indefinite"/></rect>
+${bars}<text x="220" y="${height - 38}" fill="${cyan}" font-size="9">SIGNAL.WAVE</text>
+<text x="${width - 48}" y="${height - 38}" text-anchor="end" fill="${muted}" font-size="9">${xmlText(config.profile.location.toUpperCase())} · ${xmlText(config.profile.status.toUpperCase())}</text>
+<text class="portrait-source" display="none">${portrait.slice(0, 64).map((row) => `<tspan>${xmlText(row)}</tspan>`).join("")}</text></svg>`;
+}
+
+export async function createHeroAssets(config, sourcePath, directory) {
+  const portrait = sourcePath ? await portraitFromImage(resolve(sourcePath)) : await portraitFromAssets(directory);
+  const id = createHash("sha256").update(JSON.stringify(config)).update(portrait.join("\n")).digest("hex").slice(0, 8);
+  const assets = { desktopDark: `terminal-profile-${id}-dark.svg`, desktopLight: `terminal-profile-${id}-light.svg`, mobileDark: `terminal-profile-${id}-mobile-dark.svg`, mobileLight: `terminal-profile-${id}-mobile-light.svg` };
+  await mkdir(directory, { recursive: true });
+  await Promise.all(Object.entries(assets).map(([key, filename]) => writeFile(resolve(directory, filename), makeSvg(config, portrait, key))));
+  const oldFiles = await readdir(directory);
+  await Promise.all(oldFiles.filter((name) => /^terminal-profile-[a-f0-9]{8}-(?:mobile-)?(?:dark|light)\.svg$/.test(name) && !Object.values(assets).includes(name)).map((name) => unlink(resolve(directory, name))));
+  const manifest = { version: id, assets };
+  await writeFile(resolve(directory, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+  return manifest;
+}

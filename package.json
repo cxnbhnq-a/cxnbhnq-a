@@ -1,0 +1,27 @@
+{
+  "name": "terminal-profile-dashboard",
+  "version": "2.0.0",
+  "author": "Nabhan Qori Albana",
+  "private": true,
+  "description": "A configurable animated terminal dashboard for GitHub profile READMEs.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "generate": "node scripts/generate.mjs",
+    "validate": "node scripts/validate.mjs",
+    "check": "npm run validate"
+  },
+  "keywords": [
+    "github-profile",
+    "readme",
+    "ascii-art",
+    "svg-animation",
+    "developer-portfolio"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "sharp": "^0.35.4"
+  }
+}

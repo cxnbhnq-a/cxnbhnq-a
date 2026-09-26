@@ -1,0 +1,9 @@
+{
+  "version": "f2048fb5",
+  "assets": {
+    "desktopDark": "terminal-profile-f2048fb5-dark.svg",
+    "desktopLight": "terminal-profile-f2048fb5-light.svg",
+    "mobileDark": "terminal-profile-f2048fb5-mobile-dark.svg",
+    "mobileLight": "terminal-profile-f2048fb5-mobile-light.svg"
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "$schema": "./profile.schema.json",
+  "profile": {
+    "name": "Nabhan Qori Albana",
+    "username": "cxnbhnq-a",
+    "headline": "Cyber Security | IT Enthusiast",
+    "affiliation": "Politeknik Negeri Cilacap",
+    "location": "Cilacap, Indonesia",
+    "status": "Building",
+    "about": [
+      "I build practical systems at the intersection of software engineering, artificial intelligence, and cybersecurity, turning complex problems into reliable solutions.",
+      "I approach technology with a builder\u2019s mindset: understand how things work, test them in practice, break what doesn\u2019t hold up, and share what I learn."
+    ],
+    "quickFacts": ["Cyber Security Enthusiast", "Full-Stack Developer", "System Administrator", "UI/UX Designer", "Traveler Enthusiast"]
+  },
+  "research": {
+    "primary": "Cybersecurity & Software",
+    "direction": "Resilient systems & security research",
+    "themes": "Security / Engineering / Research / Learn",
+    "narrative": "I am interested in understanding how intelligent systems interact with real-world environments: how they observe state, use tools, evaluate outcomes, and take bounded actions while maintaining clear evidence, security, and meaningful human oversight."
+  },
+  "focus": [
+    {
+      "name": "Cybersecurity",
+      "description": "Offensive security, vulnerability research, system analysis, and practical security testing."
+    },
+    {
+      "name": "Software Engineering",
+      "description": "Building reliable, maintainable software that turns complex ideas into practical and testable systems."
+    },
+    {
+      "name": "Artificial Intelligence",
+      "description": "Building and evaluating intelligent systems that can reason, use tools, adapt to context, and operate reliably in real-world environments."
+    },
+    {
+      "name": "Security Research",
+      "description": "Exploring how systems break, identifying vulnerabilities, and developing practical techniques to understand, test, and improve their security."
+    }
+  ],
+  "projects": [
+    {
+      "name": "Web Security",
+      "url": "https://github.com/cxnbhnq-a",
+      "homepage": "",
+      "focus": "Web App Security & Offensive Security",
+      "summary": "Research into web security, covering vulnerability discovery, auth & access control testing, API security, WordPress exploitation, and practical exploit validation in authorized environments.",
+      "heroLabel": "Web Security Research"
+    },
+    {
+      "name": "Web App Dev",
+      "url": "https://github.com/cxnbhnq-a",
+      "homepage": "",
+      "focus": "Full-Stack Web Development",
+      "summary": "Building practical web applications with modern technologies, focusing on clean implementation, useful functionality, responsive interfaces, and reliable user experiences.",
+      "heroLabel": "Web Development"
+    }
+  ],
+  "techStack": [
+    "Python",
+    "JavaScript",
+    "TypeScript",
+    "React",
+    "Next.js",
+    "Node.js",
+    "Linux",
+    "Burp Suite",
+    "VS Code", "HTML", "CSS", "Bootstrap", "Figma", "Laravel", "Docker", "Arch Linux", "MySQL", "Postman", "GitHub", "Kotlin", "Kali Linux"
+  ],
+  "links": [
+    {
+      "label": "GitHub",
+      "value": "cxnbhnq-a",
+      "url": "https://github.com/cxnbhnq-a",
+      "logo": "github",
+      "color": "0B1220"
+    },
+    {
+      "label": "Gmail",
+      "value": "nabhanqr07@gmail.com",
+      "url": "mailto:nabhanqr07@gmail.com",
+      "logo": "gmail",
+      "color": "EA4335"
+    },
+    {
+      "label": "LinkedIn",
+      "value": "nabhan-qori-albana",
+      "url": "https://www.linkedin.com/in/nabhan-qori-albana",
+      "logo": "linkedin",
+      "color": "0A66C2"
+    }
+  ],
+  "appearance": {
+    "palette": "signal"
+  },
+  "footer": "Exploring Security, Building Technology, and Creating Solutions"
+}
