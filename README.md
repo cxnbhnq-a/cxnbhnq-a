@@ -14,7 +14,7 @@
 
 ## About Me
 
-[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&pause=50&color=00FF00&width&align="center"=1000&lines=I+Am+Nabhan+Qori+Albana;IT+Enthusiast;Cybersecurity+Enthusiast;Ethical+Hacker;Traveler+Enthusiast;Full+-+Stack+Developer;Vibe+Coding)](https://git.io/typing-svg)
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&pause=50&color=00FF00&width&align=center=1000&lines=I+Am+Nabhan+Qori+Albana;IT+Enthusiast;Cybersecurity+Enthusiast;Ethical+Hacker;Traveler+Enthusiast;Full+-+Stack+Developer;Vibe+Coding)](https://git.io/typing-svg)
 
 I build practical systems at the intersection of software engineering, artificial intelligence, and cybersecurity, turning complex problems into reliable solutions.
 
