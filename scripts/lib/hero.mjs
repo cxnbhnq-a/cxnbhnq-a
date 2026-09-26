@@ -111,7 +111,7 @@ async function portraitFromAssets(directory) {
 
 function profileRows(config) {
   return [
-    ["prompt", `${config.profile.username}@profile ~ $ neofetch`],
+    ["prompt", `${config.profile.username}@profile ~ $ WHOAMI`],
     ["SYSTEM.INFO /", ""], ["Name", config.profile.name], ["Role", config.profile.headline],
     ["Study", config.profile.affiliation], ["Base", config.profile.location], ["Status", config.profile.status],
     ["ABOUT.ME /", ""], ...config.profile.quickFacts.slice(0, 5).map((v, i) => [`Note ${i + 1}`, v]),
@@ -167,7 +167,7 @@ function makeSvg(config, portrait, variant) {
 <rect width="100%" height="100%" fill="${bg}"/><g fill="${green}" opacity=".27">${rain}<animateTransform attributeName="transform" type="translate" values="0 90;90 -80;180 -250" dur="22s" repeatCount="indefinite"/></g><g fill="${green}" opacity=".16">${secondRain}<animateTransform attributeName="transform" type="translate" values="0 0;80 -145;160 -290" dur="31s" repeatCount="indefinite"/></g>
 <rect x="24" y="28" width="${width - 48}" height="${height - 56}" fill="none" stroke="url(#edge)" stroke-width="1.5"/>
 <circle cx="54" cy="54" r="6" fill="#ff3334"/><circle cx="72" cy="54" r="6" fill="#ffb01f"/><circle cx="90" cy="54" r="6" fill="#00c853"/>
-<text x="142" y="58" fill="${muted}" font-size="13">${xmlText(config.profile.username)}@profile ~ % ./profile-live</text><text x="${width - 48}" y="59" fill="${cyan}" font-size="11" text-anchor="end"><animate attributeName="opacity" values="1;.2;1" dur="1.2s" repeatCount="indefinite"/>● SCANNING</text>
+<text x="142" y="58" fill="${muted}" font-size="13">${xmlText(config.profile.username)}@profile ~ % ./profile-live</text><text x="${width - 48}" y="59" fill="${cyan}" font-size="11" text-anchor="end"><animate attributeName="opacity" values="1;.2;1" dur="1.2s" repeatCount="indefinite"/>● ACTIVATE</text>
 <rect x="${frame.x}" y="${frame.y}" width="${frame.w}" height="${frame.h}" rx="12" fill="${panel}" fill-opacity=".45" stroke="${blue}"/>
 <rect x="${info.x}" y="${info.y}" width="${info.w}" height="${info.h}" rx="12" fill="${panel}" fill-opacity=".55" stroke="${green}" stroke-opacity=".7"/>
 <text x="${frame.x + 20}" y="${frame.y + 28}" fill="${muted}" font-size="11" letter-spacing="1.2">VISUAL.ID / PORTRAIT.SIGNAL</text>
