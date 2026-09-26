@@ -1,79 +1,29 @@
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 
-const cell = (value) => String(value).replaceAll("|", "\\|").replaceAll("\n", " ");
-const plain = (value) => String(value);
+const HERO_START = "<!-- PROFILE-HERO:START -->";
+const HERO_END = "<!-- PROFILE-HERO:END -->";
 
-function badge(link) {
-  const segment = (value) => encodeURIComponent(String(value).replaceAll("-", "--").replaceAll("_", "__").replaceAll(" ", "_"));
-  const icon = link.logo ? `&logo=${encodeURIComponent(link.logo)}&logoColor=white` : "";
-  const image = `https://img.shields.io/badge/${segment(link.label)}-${segment(link.value)}-${link.color}?style=for-the-badge${icon}`;
-  return `<a href="${link.url}"><img alt="${link.label}: ${link.value}" src="${image}"></a>`;
-}
-
-function skillTable(skills) {
-  const known = { "VS Code": "vscode", "JavaScript": "js", "TypeScript": "ts", "Next.js": "nextjs", "Node.js": "nodejs", "Arch Linux": "arch", "Kali Linux": "kali", "Burp Suite": "burpsuite" };
-  const cells = skills.map((name) => `<td align="center" width="96"><img src="https://skillicons.dev/icons?i=${known[name] ?? name.toLowerCase().replaceAll(" ", "")}" width="48" height="48" alt="${cell(name)} icon"><br>${cell(name)}</td>`);
-  return `<table>\n${Array.from({ length: Math.ceil(cells.length / 5) }, (_, row) => `<tr>${cells.slice(row * 5, row * 5 + 5).join("")}</tr>`).join("\n")}\n</table>`;
+function heroBlock(config, assets) {
+  return `${HERO_START}\n<p align="center">\n  <picture>\n    <source media="(max-width: 760px) and (prefers-color-scheme: dark)" srcset="./assets/hero/${assets.mobileDark}">\n    <source media="(max-width: 760px)" srcset="./assets/hero/${assets.mobileLight}">\n    <source media="(prefers-color-scheme: dark)" srcset="./assets/hero/${assets.desktopDark}">\n    <source media="(prefers-color-scheme: light)" srcset="./assets/hero/${assets.desktopLight}">\n    <img src="./assets/hero/${assets.desktopDark}" alt="${config.profile.name} — ${config.profile.headline}" width="100%">\n  </picture>\n</p>\n${HERO_END}`;
 }
 
 export async function writeReadme(config, manifest, path) {
-  const hero = manifest.assets;
-  const links = config.links.map(badge).join("\n");
-  const focus = ["| Area | What I am exploring |", "| --- | --- |", ...config.focus.map((item) => `| **${cell(item.name)}** | ${cell(item.description)} |`)].join("\n");
-  const work = ["| Project | Focus | Details |", "| --- | --- | --- |", ...config.projects.map((item) => `| [**${cell(item.name)}**](${item.url}) | ${cell(item.focus)} | ${cell(item.summary)}${item.homepage ? ` [Live](${item.homepage})` : ""} |`)].join("\n");
-  const readme = `<!-- Generated from profile.config.json with Nabhan's profile builder. -->
-<p align="center">
-  <picture>
-    <source media="(max-width: 760px) and (prefers-color-scheme: dark)" srcset="./assets/hero/${hero.mobileDark}">
-    <source media="(max-width: 760px)" srcset="./assets/hero/${hero.mobileLight}">
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/hero/${hero.desktopDark}">
-    <source media="(prefers-color-scheme: light)" srcset="./assets/hero/${hero.desktopLight}">
-    <img src="./assets/hero/${hero.desktopDark}" alt="${plain(config.profile.name)} — ${plain(config.profile.headline)}" width="100%">
-  </picture>
-</p>
+  const current = await readFile(path, "utf8");
+  const block = heroBlock(config, manifest.assets);
+  const markerPattern = new RegExp(`${HERO_START}[\\s\\S]*?${HERO_END}`);
 
-<p align="center">${links}</p>
-<p align="center"><strong>${plain(config.profile.headline)}</strong></p>
+  if (markerPattern.test(current)) {
+    await writeFile(path, current.replace(markerPattern, block));
+    return current.replace(markerPattern, block);
+  }
 
-## About Me
+  // Migrate the existing generated hero once; all README content after it stays user-owned.
+  const legacyHeroPattern = /<p align="center">\s*<picture>[\s\S]*?<\/picture>\s*<\/p>/;
+  if (!legacyHeroPattern.test(current)) {
+    throw new Error(`README is missing the ${HERO_START} / ${HERO_END} markers and the generated hero block.`);
+  }
 
-${config.profile.about.join("\n\n")}
-
-${config.profile.quickFacts.map((fact) => `- ${plain(fact)}`).join("\n")}
-- ${plain(config.profile.location)}
-
-## Skills
-
-<div align="center">\n\n${skillTable(config.techStack)}\n\n</div>
-
-## Current Focus
-
-${focus}
-
-## Featured Work
-
-${work}
-
-## Research Direction
-
-${plain(config.research.narrative)}
-
-## Tech Stack
-
-${config.techStack.map((name) => `\`${cell(name)}\``).join(" · ")}
-
-## GitHub Stats
-
-<p align="center"><img src="https://github-readme-streak-stats.herokuapp.com/?user=${encodeURIComponent(config.profile.username)}&theme=tokyonight&hide_border=true" alt="GitHub streak stats"></p>
-
-## Connect With Me
-
-<p align="center">${links}</p>
-
----
-
-<p align="center">${plain(config.footer)}</p>
-`;
-  await writeFile(path, readme);
-  return readme;
+  const updated = current.replace(legacyHeroPattern, block);
+  await writeFile(path, updated);
+  return updated;
 }
