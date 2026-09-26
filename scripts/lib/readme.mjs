@@ -1,6 +1,7 @@
 import { writeFile } from "node:fs/promises";
 
 const cell = (value) => String(value).replaceAll("|", "\\|").replaceAll("\n", " ");
+const plain = (value) => String(value);
 
 function badge(link) {
   const segment = (value) => encodeURIComponent(String(value).replaceAll("-", "--").replaceAll("_", "__").replaceAll(" ", "_"));
@@ -27,19 +28,19 @@ export async function writeReadme(config, manifest, path) {
     <source media="(max-width: 760px)" srcset="./assets/hero/${hero.mobileLight}">
     <source media="(prefers-color-scheme: dark)" srcset="./assets/hero/${hero.desktopDark}">
     <source media="(prefers-color-scheme: light)" srcset="./assets/hero/${hero.desktopLight}">
-    <img src="./assets/hero/${hero.desktopDark}" alt="${cell(config.profile.name)} — ${cell(config.profile.headline)}" width="100%">
+    <img src="./assets/hero/${hero.desktopDark}" alt="${plain(config.profile.name)} — ${plain(config.profile.headline)}" width="100%">
   </picture>
 </p>
 
 <p align="center">${links}</p>
-<p align="center"><strong>${cell(config.profile.headline)}</strong></p>
+<p align="center"><strong>${plain(config.profile.headline)}</strong></p>
 
 ## About Me
 
 ${config.profile.about.join("\n\n")}
 
-${config.profile.quickFacts.map((fact) => `- ${cell(fact)}`).join("\n")}
-- ${cell(config.profile.location)}
+${config.profile.quickFacts.map((fact) => `- ${plain(fact)}`).join("\n")}
+- ${plain(config.profile.location)}
 
 ## Skills
 
@@ -55,15 +56,11 @@ ${work}
 
 ## Research Direction
 
-${config.research.narrative}
+${plain(config.research.narrative)}
 
 ## Tech Stack
 
 ${config.techStack.map((name) => `\`${cell(name)}\``).join(" · ")}
-
-## GitHub Contribution Game
-
-<p align="center"><img src="https://raw.githubusercontent.com/${config.profile.username}/${config.profile.username}/output/pacman-contribution-graph.svg" alt="GitHub contribution animation" width="100%"></p>
 
 ## GitHub Stats
 
@@ -75,7 +72,7 @@ ${config.techStack.map((name) => `\`${cell(name)}\``).join(" · ")}
 
 ---
 
-<p align="center">${cell(config.footer)}</p>
+<p align="center">${plain(config.footer)}</p>
 `;
   await writeFile(path, readme);
   return readme;

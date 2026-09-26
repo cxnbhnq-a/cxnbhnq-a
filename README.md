@@ -5,14 +5,14 @@
     <source media="(max-width: 760px)" srcset="./assets/hero/terminal-profile-f2048fb5-mobile-light.svg">
     <source media="(prefers-color-scheme: dark)" srcset="./assets/hero/terminal-profile-f2048fb5-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="./assets/hero/terminal-profile-f2048fb5-light.svg">
-    <img src="./assets/hero/terminal-profile-f2048fb5-dark.svg" alt="Nabhan Qori Albana — Cyber Security \| IT Enthusiast" width="100%">
+    <img src="./assets/hero/terminal-profile-f2048fb5-dark.svg" alt="Nabhan Qori Albana — Cyber Security | IT Enthusiast" width="100%">
   </picture>
 </p>
 
 <p align="center"><a href="https://github.com/cxnbhnq-a"><img alt="GitHub: cxnbhnq-a" src="https://img.shields.io/badge/GitHub-cxnbhnq--a-0B1220?style=for-the-badge&logo=github&logoColor=white"></a>
 <a href="mailto:nabhanqr07@gmail.com"><img alt="Gmail: nabhanqr07@gmail.com" src="https://img.shields.io/badge/Gmail-nabhanqr07%40gmail.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white"></a>
 <a href="https://www.linkedin.com/in/nabhan-qori-albana"><img alt="LinkedIn: nabhan-qori-albana" src="https://img.shields.io/badge/LinkedIn-nabhan--qori--albana-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white"></a></p>
-<p align="center"><strong>Cyber Security \| IT Enthusiast</strong></p>
+<p align="center"><strong>Cyber Security | IT Enthusiast</strong></p>
 
 ## About Me
 
@@ -64,10 +64,6 @@ I am interested in understanding how intelligent systems interact with real-worl
 ## Tech Stack
 
 `Python` · `JavaScript` · `TypeScript` · `React` · `Next.js` · `Node.js` · `Linux` · `Burp Suite` · `VS Code` · `HTML` · `CSS` · `Bootstrap` · `Figma` · `Laravel` · `Docker` · `Arch Linux` · `MySQL` · `Postman` · `GitHub` · `Kotlin` · `Kali Linux`
-
-## GitHub Contribution Game
-
-<p align="center"><img src="https://raw.githubusercontent.com/cxnbhnq-a/cxnbhnq-a/output/pacman-contribution-graph.svg" alt="GitHub contribution animation" width="100%"></p>
 
 ## GitHub Stats
 
