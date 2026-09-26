@@ -3,7 +3,7 @@ import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { bounded, xmlText } from "./xml.mjs";
 
-const rendererRevision = "nabhan-terminal-art-2026-09-26-r4";
+const rendererRevision = "nabhan-terminal-art-2026-09-26-r5";
 const portraitRows = 80;
 const portraitFont = 4.8;
 const portraitStep = 4.5;
@@ -18,14 +18,23 @@ async function portraitFromImage(path) {
   const { default: sharp } = await import("sharp");
   const image = await readFile(path);
   const meta = await sharp(image).metadata();
-  if (!meta.hasAlpha) throw new Error("Portrait PNG must have a transparent background.");
   const bounds = { background: { r: 0, g: 0, b: 0, alpha: 0 }, threshold: 8 };
-  const cropped = sharp(image).ensureAlpha().trim(bounds);
+  // Keep the full frame for photos such as JPEGs; transparent illustrations can
+  // still be trimmed to their visible artwork.
+  let cropped;
+  if (meta.hasAlpha) {
+    cropped = sharp(image).ensureAlpha().trim(bounds);
+  } else {
+    const side = Math.min(meta.width, meta.height);
+    const left = Math.floor((meta.width - side) / 2);
+    const top = Math.floor((meta.height - side) * 0.12);
+    cropped = sharp(image).extract({ left, top, width: side, height: side }).ensureAlpha();
+  }
   const dimensions = await cropped.metadata();
   const displayCellRatio = (portraitFont * 0.6 - 0.12) / portraitStep;
   const contentWidth = Math.max(1, Math.min(96, Math.round(portraitRows * (dimensions.width / dimensions.height) / displayCellRatio)));
   const [gray, alpha] = await Promise.all([
-    cropped.clone().flatten({ background: "white" }).greyscale().normalise().sharpen().resize(contentWidth, portraitRows, { fit: "fill" }).raw().toBuffer(),
+    cropped.clone().flatten({ background: "white" }).greyscale().normalise().linear(1.25, -24).sharpen().resize(contentWidth, portraitRows, { fit: "fill" }).raw().toBuffer(),
     cropped.clone().extractChannel("alpha").resize(contentWidth, portraitRows, { fit: "fill" }).raw().toBuffer()
   ]);
   const glyphs = " .:-=+*#%@";
@@ -36,7 +45,9 @@ async function portraitFromImage(path) {
     const opacity = alpha[i] / 255;
     if (opacity < 0.08) return " ";
     const light = gray[i] * opacity + 255 * (1 - opacity);
-    const tone = bounded(Math.round((255 - light) / 255 * (glyphs.length - 2)), 0, glyphs.length - 2) + 1;
+    // Bright parts of the source need denser glyphs so the portrait reads on
+    // the dark terminal panel; reverse the usual dark-on-light mapping.
+    const tone = bounded(Math.round(light / 255 * (glyphs.length - 1)), 0, glyphs.length - 1);
     return glyphs[tone];
   }).join(""));
 }
@@ -68,7 +79,7 @@ function makeSvg(config, portrait, variant) {
   const width = mobile ? 720 : 1180;
   const height = mobile ? 1230 : 650;
   const frame = mobile ? { x: 34, y: 84, w: 652, h: 426 } : { x: 36, y: 94, w: 458, h: 466 };
-  const info = mobile ? { x: 34, y: 532, w: 652, h: 570, left: 56, top: 608, step: 19, font: 13 } : { x: 514, y: 94, w: 630, h: 466, left: 536, top: 132, step: 18, font: 11.5 };
+  const info = mobile ? { x: 34, y: 532, w: 652, h: 570, left: 56, top: 620, step: 20, font: 14 } : { x: 514, y: 94, w: 630, h: 466, left: 536, top: 141, step: 17.5, font: 12 };
   const portraitY = frame.y + 38 + (frame.h - 50 - (portraitRows - 1) * portraitStep) / 2;
   const picture = portrait.slice(0, portraitRows).map((row, i) => `<tspan x="${frame.x + frame.w / 2}" y="${(portraitY + i * portraitStep).toFixed(1)}">${xmlText(row)}</tspan>`).join("");
   const details = profileRows(config).map(([key, value], i) => {
@@ -91,7 +102,7 @@ function makeSvg(config, portrait, variant) {
   }).join("");
   const bars = Array.from({ length: 31 }, (_, i) => {
     const value = [3, 5, 8, 14, 8, 4, 11, 18, 9, 5, 14, 22, 11, 6, 16, 25, 10, 5, 12, 19, 9, 4, 14, 20, 8, 4, 11, 17, 7, 4, 9][i];
-    return `<rect x="${52 + i * 5}" y="${height - 43 - value / 2}" width="2.4" height="${value}" rx="1.2" fill="${cyan}"/>`;
+    return `<rect x="${52 + i * 5}" y="${height - 55 - value / 2}" width="2.4" height="${value}" rx="1.2" fill="${cyan}"/>`;
   }).join("");
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${xmlText(config.profile.name)} terminal profile">
 <title>${xmlText(config.profile.name)} — ${xmlText(config.profile.headline)}</title>
@@ -100,16 +111,16 @@ function makeSvg(config, portrait, variant) {
 <rect width="100%" height="100%" fill="${bg}"/><g fill="${green}" opacity=".21">${rain}<animateTransform attributeName="transform" type="translate" values="0 90;90 -80;180 -250" dur="22s" repeatCount="indefinite"/></g><g fill="${green}" opacity=".12">${secondRain}<animateTransform attributeName="transform" type="translate" values="0 0;80 -145;160 -290" dur="31s" repeatCount="indefinite"/></g>
 <rect x="24" y="28" width="${width - 48}" height="${height - 56}" fill="none" stroke="url(#edge)" stroke-width="1.5"/>
 <circle cx="54" cy="54" r="6" fill="#ff3334"/><circle cx="72" cy="54" r="6" fill="#ffb01f"/><circle cx="90" cy="54" r="6" fill="#00c853"/>
-<text x="142" y="58" fill="${muted}" font-size="12">${xmlText(config.profile.username)}@profile ~ % ./profile-live</text><text x="${width - 48}" y="58" fill="${cyan}" font-size="9" text-anchor="end">● SCANNING</text>
+<text x="142" y="58" fill="${muted}" font-size="13">${xmlText(config.profile.username)}@profile ~ % ./profile-live</text><text x="${width - 48}" y="59" fill="${cyan}" font-size="11" text-anchor="end"><animate attributeName="opacity" values="1;.2;1" dur="1.2s" repeatCount="indefinite"/>● SCANNING</text>
 <rect x="${frame.x}" y="${frame.y}" width="${frame.w}" height="${frame.h}" rx="12" fill="${panel}" fill-opacity=".45" stroke="${blue}"/>
 <rect x="${info.x}" y="${info.y}" width="${info.w}" height="${info.h}" rx="12" fill="${panel}" fill-opacity=".55" stroke="${green}" stroke-opacity=".7"/>
-<text x="${frame.x + 20}" y="${frame.y + 28}" fill="${muted}" font-size="10" letter-spacing="1.2">VISUAL.ID / PORTRAIT.SIGNAL</text>
+<text x="${frame.x + 20}" y="${frame.y + 28}" fill="${muted}" font-size="11" letter-spacing="1.2">VISUAL.ID / PORTRAIT.SIGNAL</text>
 <g clip-path="url(#portrait-window)"><text class="portrait" text-anchor="middle" fill="${cyan}" opacity=".95">${picture}</text></g>
-<text x="${info.x + 22}" y="${info.y + 28}" fill="${muted}" font-size="10" letter-spacing="1.2">SYSTEM.INFO / RESEARCH.BUILDS</text>
+<text x="${info.x + 22}" y="${info.y + 28}" fill="${muted}" font-size="11" letter-spacing="1.2">SYSTEM.INFO / RESEARCH.BUILDS</text>
 <g font-size="${info.font}">${details}</g>
 <rect x="24" y="28" width="${width - 48}" height="12" fill="url(#beam)" opacity=".8"><animate attributeName="y" values="28;${height - 42};28" dur="14s" repeatCount="indefinite"/></rect>
-${bars}<text x="220" y="${height - 38}" fill="${cyan}" font-size="9">AUDIO SIGNAL</text>
-<text x="${width - 48}" y="${height - 38}" text-anchor="end" fill="${muted}" font-size="9">${xmlText(config.profile.location.toUpperCase())} · ${xmlText(config.profile.status.toUpperCase())}</text>
+${bars}<text x="220" y="${height - 50}" fill="${cyan}" font-size="10">AUDIO SIGNAL</text>
+<text x="${width - 48}" y="${height - 50}" text-anchor="end" fill="${muted}" font-size="11">TEGAL, INDONESIA · ${xmlText(config.profile.status.toUpperCase())}</text>
 <text class="portrait-source" display="none">${portrait.slice(0, portraitRows).map((row) => `<tspan>${xmlText(row)}</tspan>`).join("")}</text></svg>`;
 }
 
