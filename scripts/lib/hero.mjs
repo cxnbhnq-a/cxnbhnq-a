@@ -3,10 +3,10 @@ import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { bounded, xmlText } from "./xml.mjs";
 
-const rendererRevision = "nabhan-terminal-art-2026-09-26-r7";
-const portraitRows = 80;
+const rendererRevision = "nabhan-terminal-art-2026-09-26-r11";
+const portraitRows = 88;
 const portraitFont = 4.8;
-const portraitStep = 4.5;
+const portraitStep = 4.3;
 
 const colorSets = {
   signal: { dark: ["#111214", "#15191A", "#DCE8E4", "#788781", "#00D6AA", "#2864F0", "#00B879"], light: ["#F1F3F5", "#FFFFFF", "#17221F", "#66736E", "#008F75", "#2858D8", "#087C57"] },
@@ -14,15 +14,38 @@ const colorSets = {
   solar: { dark: ["#151310", "#1D1A16", "#F0E9DB", "#948A78", "#48D2AE", "#75A5FF", "#C2D65C"], light: ["#FBF8F0", "#FFFFFF", "#30291F", "#817663", "#087D67", "#365FBE", "#617C20"] }
 };
 
+async function terminalizeTransparentPng(sharp, image, meta) {
+  const { data: source, info } = await sharp(image).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const data = Buffer.alloc(source.length);
+  const lineTones = [[0, 46, 62], [0, 82, 105], [0, 139, 160], [4, 194, 211]];
+  for (let y = 0; y < info.height; y += 1) {
+    // Leave transparent gaps between horizontal phosphor rows. At display
+    // scale these become clear scanlines instead of a photo with a color wash.
+    if (y % 6 >= 2) continue;
+    for (let x = 0; x < info.width; x += 1) {
+      const i = (y * info.width + x) * 4;
+      const alpha = source[i + 3];
+      if (alpha === 0) continue;
+      const luminance = (0.2126 * source[i] + 0.7152 * source[i + 1] + 0.0722 * source[i + 2]) / 255;
+      const level = Math.min(3, Math.floor(Math.pow(luminance, 0.88) * 4));
+      const [red, green, blue] = lineTones[level];
+      data[i] = red;
+      data[i + 1] = green;
+      data[i + 2] = blue;
+      data[i + 3] = alpha;
+    }
+  }
+  const png = await sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } })
+    .png({ compressionLevel: 9 })
+    .toBuffer();
+  return { imageDataUri: `data:image/png;base64,${png.toString("base64")}`, imageWidth: meta.width, imageHeight: meta.height };
+}
+
 async function portraitFromImage(path) {
   const { default: sharp } = await import("sharp");
   const image = await readFile(path);
   const meta = await sharp(image).metadata();
-  // A manually cut-out PNG should stay a real transparent image. Converting it
-  // to ASCII destroys the facial detail and clean edges the user prepared.
-  if (meta.format === "png" && meta.hasAlpha) {
-    return { imageDataUri: `data:image/png;base64,${image.toString("base64")}`, imageWidth: meta.width, imageHeight: meta.height };
-  }
+  if (meta.format === "png" && meta.hasAlpha) return terminalizeTransparentPng(sharp, image, meta);
   const bounds = { background: { r: 0, g: 0, b: 0, alpha: 0 }, threshold: 8 };
   // Keep the full frame for photos such as JPEGs; transparent illustrations can
   // still be trimmed to their visible artwork.
@@ -55,7 +78,7 @@ async function portraitFromImage(path) {
     const fraction = (at - y0) / (y1 - y0);
     return [l0 + (l1 - l0) * fraction, r0 + (r1 - r0) * fraction];
   });
-  const rows = Array.from({ length: portraitRows }, (_, y) => Array.from({ length: 96 }, (_, x) => {
+  return Array.from({ length: portraitRows }, (_, y) => Array.from({ length: 96 }, (_, x) => {
     const sourceX = x - Math.floor((96 - contentWidth) / 2);
     if (sourceX < 0 || sourceX >= contentWidth) return " ";
     const i = y * contentWidth + sourceX;
@@ -68,23 +91,22 @@ async function portraitFromImage(path) {
       opacity *= subjectOpacity;
     }
     if (opacity < 0.08) return " ";
-    const light = gray[i] * opacity;
-    // Bright parts of the source need denser glyphs so the portrait reads on
-    // the dark terminal panel; reverse the usual dark-on-light mapping.
-    const tone = bounded(Math.round(light / 255 * (glyphs.length - 1)), 0, glyphs.length - 1);
+    const light = (gray[i] / 255) * opacity;
+    // Keep shadows visible as faint terminal marks while reserving dense glyphs
+    // for the bright details of the cut-out image.
+    const tone = bounded(Math.round((0.24 + light * 0.76) * (glyphs.length - 1)), 0, glyphs.length - 1);
     return glyphs[tone];
   }).join(""));
-  return { rows };
 }
 
 async function portraitFromAssets(directory) {
   const manifest = JSON.parse(await readFile(resolve(directory, "manifest.json"), "utf8"));
   const svg = await readFile(resolve(directory, manifest.assets.desktopDark), "utf8");
   const image = svg.match(/<image class="portrait-image"[^>]*data-width="(\d+)" data-height="(\d+)"[^>]*href="(data:image\/png;base64,[^"]+)"/);
-  if (image) return { imageWidth: Number(image[1]), imageHeight: Number(image[2]), imageDataUri: image[3] };
+  if (image) return { imageDataUri: image[3], imageWidth: Number(image[1]), imageHeight: Number(image[2]) };
   const encoded = svg.match(/<text class="(?:portrait-source|ascii-source)"[^>]*>([\s\S]*?)<\/text>/)?.[1];
   if (!encoded) throw new Error("Portrait source is unavailable. Pass --source with a transparent PNG.");
-  return { rows: [...encoded.matchAll(/<tspan>([\s\S]*?)<\/tspan>/g)].map((match) => match[1]) };
+  return [...encoded.matchAll(/<tspan>([\s\S]*?)<\/tspan>/g)].map((match) => match[1]);
 }
 
 function profileRows(config) {
@@ -109,8 +131,8 @@ function makeSvg(config, portrait, variant) {
   const info = mobile ? { x: 34, y: 532, w: 652, h: 570, left: 56, top: 620, step: 20, font: 14 } : { x: 514, y: 94, w: 630, h: 466, left: 536, top: 141, step: 17.5, font: 12 };
   const portraitY = frame.y + 38 + (frame.h - 50 - (portraitRows - 1) * portraitStep) / 2;
   const picture = portrait.imageDataUri
-    ? `<image class="portrait-image" data-width="${portrait.imageWidth}" data-height="${portrait.imageHeight}" x="${frame.x + 16}" y="${frame.y + 38}" width="${frame.w - 32}" height="${frame.h - 50}" preserveAspectRatio="xMidYMid meet" href="${portrait.imageDataUri}"/>`
-    : `<text class="portrait" text-anchor="middle" fill="${cyan}" opacity=".95">${portrait.rows.slice(0, portraitRows).map((row, i) => `<tspan x="${frame.x + frame.w / 2}" y="${(portraitY + i * portraitStep).toFixed(1)}">${xmlText(row)}</tspan>`).join("")}</text>`;
+    ? `<image class="portrait-image" data-width="${portrait.imageWidth}" data-height="${portrait.imageHeight}" x="${frame.x + 16}" y="${frame.y + 38}" width="${frame.w - 32}" height="${frame.h - 50}" opacity=".92" preserveAspectRatio="xMidYMid meet" href="${portrait.imageDataUri}"/>`
+    : `<text class="portrait" text-anchor="middle" fill="${cyan}" opacity=".95">${portrait.slice(0, portraitRows).map((row, i) => `<tspan x="${frame.x + frame.w / 2}" y="${(portraitY + i * portraitStep).toFixed(1)}">${xmlText(row)}</tspan>`).join("")}</text>`;
   const details = profileRows(config).map(([key, value], i) => {
     const y = info.top + i * info.step;
     if (key === "prompt") return `<text x="${info.left}" y="${y}" fill="${blue}" font-size="${info.font + 1}" font-weight="bold">${xmlText(value)}</text>`;
@@ -133,6 +155,11 @@ function makeSvg(config, portrait, variant) {
     const value = [3, 5, 8, 14, 8, 4, 11, 18, 9, 5, 14, 22, 11, 6, 16, 25, 10, 5, 12, 19, 9, 4, 14, 20, 8, 4, 11, 17, 7, 4, 9][i];
     return `<rect x="${52 + i * 5}" y="${height - 55 - value / 2}" width="2.4" height="${value}" rx="1.2" fill="${cyan}"/>`;
   }).join("");
+  const scanGlitches = [
+    { x: 24 + width * .12, width: width * .14 },
+    { x: 24 + width * .49, width: width * .11 },
+    { x: 24 + width * .77, width: width * .16 }
+  ].map(({ x, width: stripWidth }, i) => `<rect x="${x}" y="21" width="${stripWidth}" height="${i === 1 ? 2 : 3}" fill="${cyan}" opacity="0"><animate attributeName="y" values="21;${height - 49};21" dur="14s" repeatCount="indefinite"/><animate attributeName="x" values="${x};${x + 7};${x - 4};${x + 5};${x}" dur="${.53 + i * .17}s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;.8;.18;.65;0" dur=".9s" repeatCount="indefinite"/></rect>`).join("");
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${xmlText(config.profile.name)} terminal profile">
 <title>${xmlText(config.profile.name)} — ${xmlText(config.profile.headline)}</title>
 <defs><clipPath id="portrait-window"><rect x="${frame.x}" y="${frame.y}" width="${frame.w}" height="${frame.h}" rx="12"/></clipPath><linearGradient id="edge"><stop stop-color="${blue}"/><stop offset="1" stop-color="${green}"/></linearGradient><linearGradient id="beam"><stop stop-color="${cyan}" stop-opacity="0"/><stop offset=".5" stop-color="${cyan}" stop-opacity=".35"/><stop offset="1" stop-color="${cyan}" stop-opacity="0"/></linearGradient></defs>
@@ -147,15 +174,15 @@ function makeSvg(config, portrait, variant) {
 <g clip-path="url(#portrait-window)">${picture}</g>
 <text x="${info.x + 22}" y="${info.y + 28}" fill="${muted}" font-size="11" letter-spacing="1.2">SYSTEM.INFO / RESEARCH.BUILDS</text>
 <g font-size="${info.font}">${details}</g>
-<rect x="24" y="28" width="${width - 48}" height="12" fill="url(#beam)" opacity=".8"><animate attributeName="y" values="28;${height - 42};28" dur="14s" repeatCount="indefinite"/></rect>
+<rect x="24" y="28" width="${width - 48}" height="12" fill="url(#beam)" opacity="0"><animate attributeName="y" values="28;${height - 42};28" dur="14s" repeatCount="indefinite"/><animate attributeName="opacity" values=".8;.8;.25;1;.55;.8" dur="1.1s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 0;4 0;-2 0;0 0;7 0;0 0" dur=".72s" repeatCount="indefinite"/></rect>${scanGlitches}
 ${bars}<text x="220" y="${height - 50}" fill="${cyan}" font-size="10">AUDIO SIGNAL</text>
 <text x="${width - 48}" y="${height - 50}" text-anchor="end" fill="${muted}" font-size="11">TEGAL, INDONESIA · ${xmlText(config.profile.status.toUpperCase())}</text>
-${portrait.imageDataUri ? "" : `<text class="portrait-source" display="none">${portrait.rows.slice(0, portraitRows).map((row) => `<tspan>${xmlText(row)}</tspan>`).join("")}</text>`}</svg>`;
+${portrait.imageDataUri ? "" : `<text class="portrait-source" display="none">${portrait.slice(0, portraitRows).map((row) => `<tspan>${xmlText(row)}</tspan>`).join("")}</text>`}</svg>`;
 }
 
 export async function createHeroAssets(config, sourcePath, directory) {
   const portrait = sourcePath ? await portraitFromImage(resolve(sourcePath)) : await portraitFromAssets(directory);
-  const id = createHash("sha256").update(rendererRevision).update(JSON.stringify(config)).update(portrait.imageDataUri ?? portrait.rows.join("\n")).digest("hex").slice(0, 8);
+  const id = createHash("sha256").update(rendererRevision).update(JSON.stringify(config)).update(portrait.imageDataUri ?? portrait.join("\n")).digest("hex").slice(0, 8);
   const assets = { desktopDark: `terminal-profile-${id}-dark.svg`, desktopLight: `terminal-profile-${id}-light.svg`, mobileDark: `terminal-profile-${id}-mobile-dark.svg`, mobileLight: `terminal-profile-${id}-mobile-light.svg` };
   await mkdir(directory, { recursive: true });
   await Promise.all(Object.entries(assets).map(([key, filename]) => writeFile(resolve(directory, filename), makeSvg(config, portrait, key))));
