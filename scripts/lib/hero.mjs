@@ -3,7 +3,7 @@ import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { bounded, xmlText } from "./xml.mjs";
 
-const rendererRevision = "nabhan-terminal-art-2026-09-26-r6";
+const rendererRevision = "nabhan-terminal-art-2026-09-26-r7";
 const portraitRows = 80;
 const portraitFont = 4.8;
 const portraitStep = 4.5;
@@ -18,6 +18,11 @@ async function portraitFromImage(path) {
   const { default: sharp } = await import("sharp");
   const image = await readFile(path);
   const meta = await sharp(image).metadata();
+  // A manually cut-out PNG should stay a real transparent image. Converting it
+  // to ASCII destroys the facial detail and clean edges the user prepared.
+  if (meta.format === "png" && meta.hasAlpha) {
+    return { imageDataUri: `data:image/png;base64,${image.toString("base64")}`, imageWidth: meta.width, imageHeight: meta.height };
+  }
   const bounds = { background: { r: 0, g: 0, b: 0, alpha: 0 }, threshold: 8 };
   // Keep the full frame for photos such as JPEGs; transparent illustrations can
   // still be trimmed to their visible artwork.
@@ -50,7 +55,7 @@ async function portraitFromImage(path) {
     const fraction = (at - y0) / (y1 - y0);
     return [l0 + (l1 - l0) * fraction, r0 + (r1 - r0) * fraction];
   });
-  return Array.from({ length: portraitRows }, (_, y) => Array.from({ length: 96 }, (_, x) => {
+  const rows = Array.from({ length: portraitRows }, (_, y) => Array.from({ length: 96 }, (_, x) => {
     const sourceX = x - Math.floor((96 - contentWidth) / 2);
     if (sourceX < 0 || sourceX >= contentWidth) return " ";
     const i = y * contentWidth + sourceX;
@@ -69,14 +74,17 @@ async function portraitFromImage(path) {
     const tone = bounded(Math.round(light / 255 * (glyphs.length - 1)), 0, glyphs.length - 1);
     return glyphs[tone];
   }).join(""));
+  return { rows };
 }
 
 async function portraitFromAssets(directory) {
   const manifest = JSON.parse(await readFile(resolve(directory, "manifest.json"), "utf8"));
   const svg = await readFile(resolve(directory, manifest.assets.desktopDark), "utf8");
+  const image = svg.match(/<image class="portrait-image"[^>]*data-width="(\d+)" data-height="(\d+)"[^>]*href="(data:image\/png;base64,[^"]+)"/);
+  if (image) return { imageWidth: Number(image[1]), imageHeight: Number(image[2]), imageDataUri: image[3] };
   const encoded = svg.match(/<text class="(?:portrait-source|ascii-source)"[^>]*>([\s\S]*?)<\/text>/)?.[1];
   if (!encoded) throw new Error("Portrait source is unavailable. Pass --source with a transparent PNG.");
-  return [...encoded.matchAll(/<tspan>([\s\S]*?)<\/tspan>/g)].map((match) => match[1]);
+  return { rows: [...encoded.matchAll(/<tspan>([\s\S]*?)<\/tspan>/g)].map((match) => match[1]) };
 }
 
 function profileRows(config) {
@@ -100,7 +108,9 @@ function makeSvg(config, portrait, variant) {
   const frame = mobile ? { x: 34, y: 84, w: 652, h: 426 } : { x: 36, y: 94, w: 458, h: 466 };
   const info = mobile ? { x: 34, y: 532, w: 652, h: 570, left: 56, top: 620, step: 20, font: 14 } : { x: 514, y: 94, w: 630, h: 466, left: 536, top: 141, step: 17.5, font: 12 };
   const portraitY = frame.y + 38 + (frame.h - 50 - (portraitRows - 1) * portraitStep) / 2;
-  const picture = portrait.slice(0, portraitRows).map((row, i) => `<tspan x="${frame.x + frame.w / 2}" y="${(portraitY + i * portraitStep).toFixed(1)}">${xmlText(row)}</tspan>`).join("");
+  const picture = portrait.imageDataUri
+    ? `<image class="portrait-image" data-width="${portrait.imageWidth}" data-height="${portrait.imageHeight}" x="${frame.x + 16}" y="${frame.y + 38}" width="${frame.w - 32}" height="${frame.h - 50}" preserveAspectRatio="xMidYMid meet" href="${portrait.imageDataUri}"/>`
+    : `<text class="portrait" text-anchor="middle" fill="${cyan}" opacity=".95">${portrait.rows.slice(0, portraitRows).map((row, i) => `<tspan x="${frame.x + frame.w / 2}" y="${(portraitY + i * portraitStep).toFixed(1)}">${xmlText(row)}</tspan>`).join("")}</text>`;
   const details = profileRows(config).map(([key, value], i) => {
     const y = info.top + i * info.step;
     if (key === "prompt") return `<text x="${info.left}" y="${y}" fill="${blue}" font-size="${info.font + 1}" font-weight="bold">${xmlText(value)}</text>`;
@@ -134,18 +144,18 @@ function makeSvg(config, portrait, variant) {
 <rect x="${frame.x}" y="${frame.y}" width="${frame.w}" height="${frame.h}" rx="12" fill="${panel}" fill-opacity=".45" stroke="${blue}"/>
 <rect x="${info.x}" y="${info.y}" width="${info.w}" height="${info.h}" rx="12" fill="${panel}" fill-opacity=".55" stroke="${green}" stroke-opacity=".7"/>
 <text x="${frame.x + 20}" y="${frame.y + 28}" fill="${muted}" font-size="11" letter-spacing="1.2">VISUAL.ID / PORTRAIT.SIGNAL</text>
-<g clip-path="url(#portrait-window)"><text class="portrait" text-anchor="middle" fill="${cyan}" opacity=".95">${picture}</text></g>
+<g clip-path="url(#portrait-window)">${picture}</g>
 <text x="${info.x + 22}" y="${info.y + 28}" fill="${muted}" font-size="11" letter-spacing="1.2">SYSTEM.INFO / RESEARCH.BUILDS</text>
 <g font-size="${info.font}">${details}</g>
 <rect x="24" y="28" width="${width - 48}" height="12" fill="url(#beam)" opacity=".8"><animate attributeName="y" values="28;${height - 42};28" dur="14s" repeatCount="indefinite"/></rect>
 ${bars}<text x="220" y="${height - 50}" fill="${cyan}" font-size="10">AUDIO SIGNAL</text>
 <text x="${width - 48}" y="${height - 50}" text-anchor="end" fill="${muted}" font-size="11">TEGAL, INDONESIA · ${xmlText(config.profile.status.toUpperCase())}</text>
-<text class="portrait-source" display="none">${portrait.slice(0, portraitRows).map((row) => `<tspan>${xmlText(row)}</tspan>`).join("")}</text></svg>`;
+${portrait.imageDataUri ? "" : `<text class="portrait-source" display="none">${portrait.rows.slice(0, portraitRows).map((row) => `<tspan>${xmlText(row)}</tspan>`).join("")}</text>`}</svg>`;
 }
 
 export async function createHeroAssets(config, sourcePath, directory) {
   const portrait = sourcePath ? await portraitFromImage(resolve(sourcePath)) : await portraitFromAssets(directory);
-  const id = createHash("sha256").update(rendererRevision).update(JSON.stringify(config)).update(portrait.join("\n")).digest("hex").slice(0, 8);
+  const id = createHash("sha256").update(rendererRevision).update(JSON.stringify(config)).update(portrait.imageDataUri ?? portrait.rows.join("\n")).digest("hex").slice(0, 8);
   const assets = { desktopDark: `terminal-profile-${id}-dark.svg`, desktopLight: `terminal-profile-${id}-light.svg`, mobileDark: `terminal-profile-${id}-mobile-dark.svg`, mobileLight: `terminal-profile-${id}-mobile-light.svg` };
   await mkdir(directory, { recursive: true });
   await Promise.all(Object.entries(assets).map(([key, filename]) => writeFile(resolve(directory, filename), makeSvg(config, portrait, key))));
