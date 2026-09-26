@@ -3,7 +3,7 @@ import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { bounded, xmlText } from "./xml.mjs";
 
-const rendererRevision = "nabhan-terminal-art-2026-09-26-r5";
+const rendererRevision = "nabhan-terminal-art-2026-09-26-r6";
 const portraitRows = 80;
 const portraitFont = 4.8;
 const portraitStep = 4.5;
@@ -38,13 +38,32 @@ async function portraitFromImage(path) {
     cropped.clone().extractChannel("alpha").resize(contentWidth, portraitRows, { fit: "fill" }).raw().toBuffer()
   ]);
   const glyphs = " .:-=+*#%@";
+  // Profile photos are usually centered. Fade the outer image into the
+  // terminal so the person stays visible while the original scenery recedes.
+  const subjectWidths = [[0, .34, .66], [.06, .27, .75], [.16, .14, .88], [.3, .08, .94], [.46, .09, .93], [.56, .17, .84], [.64, .06, .96], [.74, .01, .99], [.84, 0, 1], [1, 0, 1]];
+  const subjectEdges = Array.from({ length: portraitRows }, (_, y) => {
+    const at = y / (portraitRows - 1);
+    const index = subjectWidths.findIndex(([row]) => row >= at);
+    const next = Math.max(1, index);
+    const [y0, l0, r0] = subjectWidths[next - 1];
+    const [y1, l1, r1] = subjectWidths[next];
+    const fraction = (at - y0) / (y1 - y0);
+    return [l0 + (l1 - l0) * fraction, r0 + (r1 - r0) * fraction];
+  });
   return Array.from({ length: portraitRows }, (_, y) => Array.from({ length: 96 }, (_, x) => {
     const sourceX = x - Math.floor((96 - contentWidth) / 2);
     if (sourceX < 0 || sourceX >= contentWidth) return " ";
     const i = y * contentWidth + sourceX;
-    const opacity = alpha[i] / 255;
+    let opacity = alpha[i] / 255;
+    if (!meta.hasAlpha) {
+      const [left, right] = subjectEdges[y];
+      const edgeDistance = Math.min(sourceX / contentWidth - left, right - sourceX / contentWidth);
+      const feather = 0.035;
+      const subjectOpacity = bounded((edgeDistance + feather) / feather, 0, 1);
+      opacity *= subjectOpacity;
+    }
     if (opacity < 0.08) return " ";
-    const light = gray[i] * opacity + 255 * (1 - opacity);
+    const light = gray[i] * opacity;
     // Bright parts of the source need denser glyphs so the portrait reads on
     // the dark terminal panel; reverse the usual dark-on-light mapping.
     const tone = bounded(Math.round(light / 255 * (glyphs.length - 1)), 0, glyphs.length - 1);
@@ -108,7 +127,7 @@ function makeSvg(config, portrait, variant) {
 <title>${xmlText(config.profile.name)} — ${xmlText(config.profile.headline)}</title>
 <defs><clipPath id="portrait-window"><rect x="${frame.x}" y="${frame.y}" width="${frame.w}" height="${frame.h}" rx="12"/></clipPath><linearGradient id="edge"><stop stop-color="${blue}"/><stop offset="1" stop-color="${green}"/></linearGradient><linearGradient id="beam"><stop stop-color="${cyan}" stop-opacity="0"/><stop offset=".5" stop-color="${cyan}" stop-opacity=".35"/><stop offset="1" stop-color="${cyan}" stop-opacity="0"/></linearGradient></defs>
 <style>text{font-family:'Courier New',monospace}.portrait{font-size:${portraitFont}px;letter-spacing:-.12px}@media(prefers-reduced-motion:reduce){animate,animateTransform{display:none}}</style>
-<rect width="100%" height="100%" fill="${bg}"/><g fill="${green}" opacity=".21">${rain}<animateTransform attributeName="transform" type="translate" values="0 90;90 -80;180 -250" dur="22s" repeatCount="indefinite"/></g><g fill="${green}" opacity=".12">${secondRain}<animateTransform attributeName="transform" type="translate" values="0 0;80 -145;160 -290" dur="31s" repeatCount="indefinite"/></g>
+<rect width="100%" height="100%" fill="${bg}"/><g fill="${green}" opacity=".27">${rain}<animateTransform attributeName="transform" type="translate" values="0 90;90 -80;180 -250" dur="22s" repeatCount="indefinite"/></g><g fill="${green}" opacity=".16">${secondRain}<animateTransform attributeName="transform" type="translate" values="0 0;80 -145;160 -290" dur="31s" repeatCount="indefinite"/></g>
 <rect x="24" y="28" width="${width - 48}" height="${height - 56}" fill="none" stroke="url(#edge)" stroke-width="1.5"/>
 <circle cx="54" cy="54" r="6" fill="#ff3334"/><circle cx="72" cy="54" r="6" fill="#ffb01f"/><circle cx="90" cy="54" r="6" fill="#00c853"/>
 <text x="142" y="58" fill="${muted}" font-size="13">${xmlText(config.profile.username)}@profile ~ % ./profile-live</text><text x="${width - 48}" y="59" fill="${cyan}" font-size="11" text-anchor="end"><animate attributeName="opacity" values="1;.2;1" dur="1.2s" repeatCount="indefinite"/>● SCANNING</text>
