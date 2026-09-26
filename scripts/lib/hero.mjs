@@ -3,7 +3,7 @@ import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { bounded, xmlText } from "./xml.mjs";
 
-const rendererRevision = "nabhan-terminal-art-2026-09-26-r11";
+const rendererRevision = "nabhan-terminal-art-2026-09-26-r12";
 const portraitRows = 88;
 const portraitFont = 4.8;
 const portraitStep = 4.3;

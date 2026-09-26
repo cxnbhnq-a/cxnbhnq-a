@@ -1,10 +1,10 @@
 {
-  "generator": "nabhan-terminal-art-2026-09-26-r11",
-  "version": "3bf8881b",
+  "generator": "nabhan-terminal-art-2026-09-26-r12",
+  "version": "13f30292",
   "assets": {
-    "desktopDark": "terminal-profile-3bf8881b-dark.svg",
-    "desktopLight": "terminal-profile-3bf8881b-light.svg",
-    "mobileDark": "terminal-profile-3bf8881b-mobile-dark.svg",
-    "mobileLight": "terminal-profile-3bf8881b-mobile-light.svg"
+    "desktopDark": "terminal-profile-13f30292-dark.svg",
+    "desktopLight": "terminal-profile-13f30292-light.svg",
+    "mobileDark": "terminal-profile-13f30292-mobile-dark.svg",
+    "mobileLight": "terminal-profile-13f30292-mobile-light.svg"
   }
 }
