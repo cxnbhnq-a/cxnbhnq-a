@@ -133,7 +133,7 @@ I am interested in understanding how intelligent systems interact with real-worl
 
 <p align="center"><a href="https://github.com/cxnbhnq-a"><img alt="GitHub: cxnbhnq-a" src="https://img.shields.io/badge/GitHub-cxnbhnq--a-0B1220?style=for-the-badge&logo=github&logoColor=white"></a>
 <a href="mailto:nabhanqr07@gmail.com"><img alt="Gmail: nabhanqr07@gmail.com" src="https://img.shields.io/badge/Gmail-nabhanqr07%40gmail.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white"></a>
-<a href="https://www.linkedin.com/in/nabhan-qori-albana-153027298"><img alt="LinkedIn: nabhan-qori-albana" src="https://img.shields.io/badge/LinkedIn-nabhan--qori--albana-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white"></a></p>
+<a href="https://www.linkedin.com/in/nabhan-qori-albana-153027298" target="_blank" rel="noopener noreferrer"><img alt="LinkedIn: nabhan-qori-albana" src="https://img.shields.io/badge/LinkedIn-nabhan--qori--albana-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white"></a></p>
 
 ---
 
